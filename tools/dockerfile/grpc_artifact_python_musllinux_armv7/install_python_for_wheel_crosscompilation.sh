@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -x
 # Copyright 2021 The gRPC Authors
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -41,12 +41,11 @@ pushd "Python-${PYTHON_RELEASE}"
 # really need this header anymore, we simply generate a new pyconfig.h using our crosscompilation
 # toolchain and overwrite the current ("wrong") version in the python's include directory.
 printf "ac_cv_file__dev_ptmx=no\nac_cv_file__dev_ptc=no\n" > config.site
-READELF=/usr/xcc/armv7-unknown-linux-gnueabi/bin/armv7-unknown-linux-gnueabi-readelf CONFIG_SITE="config.site" PYTHON_FOR_BUILD="${PYTHON_PREFIX}/bin/python-${PYTHON_VERSION}" ./configure --host="${PYTHON_HOST}" --build="${PYTHON_BUILD}" --disable-ipv6 
+CONFIG_SITE="config.site" PYTHON_FOR_BUILD="${PYTHON_PREFIX}/bin/python-${PYTHON_VERSION}" ./configure --host="${PYTHON_HOST}" --build="${PYTHON_BUILD}" --disable-ipv6
 cp pyconfig.h "${PYTHON_PREFIX}"/include/python*
 
 popd
 # remove the build directory to decrease the overall docker image size
-rm -rf "Python-${PYTHON_VERSION}"
 
 # install cython and wheel
-"${PYTHON_PREFIX}/bin/pip3" install --upgrade cython wheel auditwheel
+"${PYTHON_PREFIX}/bin/pip3" install --upgrade cython wheel
