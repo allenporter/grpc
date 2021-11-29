@@ -112,6 +112,8 @@ class PythonArtifact:
             # Their build is now much faster, so they can be included
             # in the regular artifact build.
             self.labels.append('linux')
+        if 'musllinux' in platform:
+            self.labels.append('linux')
 
     def pre_build_jobspecs(self):
         return []
@@ -124,6 +126,7 @@ class PythonArtifact:
                 self.py_version)
             environ['PIP'] = '/opt/python/{}/bin/pip3'.format(self.py_version)
             environ['GRPC_SKIP_PIP_CYTHON_UPGRADE'] = 'TRUE'
+            environ['GRPC_RUN_AUDITWHEEL_REPAIR'] = 'TRUE'
             environ['GRPC_SKIP_TWINE_CHECK'] = 'TRUE'
             return create_docker_jobspec(
                 self.name,
@@ -151,6 +154,22 @@ class PythonArtifact:
                 # - they require protoc to run on current architecture
                 # - they only have sdist packages anyway, so it's useless to build them again
                 environ['GRPC_BUILD_GRPCIO_TOOLS_DEPENDENTS'] = 'TRUE'
+            return create_docker_jobspec(
+                self.name,
+                'tools/dockerfile/grpc_artifact_python_%s_%s' %
+                (self.platform, self.arch),
+                'tools/run_tests/artifacts/build_artifact_python.sh',
+                environ=environ,
+                timeout_seconds=60 * 60 * 2)
+        elif 'musllinux' in self.platform:
+            environ['PYTHON'] = '/opt/python/{}/bin/python3'.format(
+                self.py_version)
+            environ['PIP'] = '/opt/python/{}/bin/pip3'.format(self.py_version)
+            environ['GRPC_SKIP_PIP_CYTHON_UPGRADE'] = 'TRUE'
+            #environ['GRPC_RUN_AUDITWHEEL_REPAIR'] = 'TRUE'
+            environ['GRPC_PYTHON_BUILD_WITH_STATIC_LIBSTDCXX'] = 'TRUE'
+            if self.arch == 'armv7':
+                environ['GRPC_PYTHON_DISABLE_LIBC_COMPATIBILITY'] = 'TRUE'
             return create_docker_jobspec(
                 self.name,
                 'tools/dockerfile/grpc_artifact_python_%s_%s' %
@@ -386,6 +405,8 @@ def targets():
         PythonArtifact('linux_extra', 'armv7', 'cp38-cp38'),
         PythonArtifact('linux_extra', 'armv7', 'cp39-cp39'),
         PythonArtifact('linux_extra', 'armv7', 'cp310-cp310'),
+        PythonArtifact('musllinux', 'armv7', 'cp39-cp39'),
+        PythonArtifact('musllinux', 'armv7', 'cp310-cp310'),
         PythonArtifact('macos', 'x64', 'python3.6'),
         PythonArtifact('macos', 'x64', 'python3.7'),
         PythonArtifact('macos', 'x64', 'python3.8'),

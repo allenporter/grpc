@@ -109,6 +109,7 @@ if not build_jobs:
     print('Nothing to build.')
     sys.exit(1)
 
+print(build_jobs)
 jobset.message('START', 'Building targets.', do_newline=True)
 num_failures, resultset = jobset.run(build_jobs,
                                      newline_on_success=True,
