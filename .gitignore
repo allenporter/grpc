@@ -162,3 +162,6 @@ compile_commands.json
 compile_commands_for_iwyu.json
 iwyu.out
 iwyu_files.txt
+
+# Wheel development
+docker/*/*.whl
