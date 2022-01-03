@@ -1,4 +1,4 @@
-FROM homeassistant/armv7-base-python:3.8-alpine3.12
+FROM homeassistant/armv7-base-python:3.8-alpine3.14
 
 ARG WHEEL
 ENV PIP_WHEEL=${WHEEL}
