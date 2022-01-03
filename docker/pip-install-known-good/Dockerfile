@@ -2,7 +2,6 @@
 FROM arm32v7/alpine:3.9
 
 RUN apk add --no-cache python3 py3-pip
-#RUN apk add libstdc++ libc6-compat libatomic g++ python3-dev linux-headers
 RUN python3 --version
 RUN pip3 install wheel
 RUN pip3 install --upgrade pip
