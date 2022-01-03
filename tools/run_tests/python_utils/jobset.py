@@ -31,7 +31,7 @@ measure_cpu_costs = False
 _DEFAULT_MAX_JOBS = 16 * multiprocessing.cpu_count()
 # Maximum number of bytes of job's stdout that will be stored in the result.
 # Only last N bytes of stdout will be kept if the actual output longer.
-_MAX_RESULT_SIZE = 64 * 1024
+_MAX_RESULT_SIZE = 64 * 1024 * 1024
 
 
 # NOTE: If you change this, please make sure to test reviewing the
@@ -216,8 +216,8 @@ class JobSpec(object):
         return self.identity() < other.identity()
 
     def __repr__(self):
-        return 'JobSpec(shortname=%s, cmdline=%s)' % (self.shortname,
-                                                      self.cmdline)
+        return 'JobSpec(shortname=%s, cmdline=%s, environ=%s)' % (self.shortname,
+                                                      self.cmdline, self.environ)
 
     def __str__(self):
         return '%s: %s %s' % (self.shortname, ' '.join(
@@ -276,11 +276,13 @@ class Job(object):
             if not os.path.exists(logfile_dir):
                 os.makedirs(logfile_dir)
             self._logfile = open(self._spec.logfilename, 'w+')
+            print("\nLog file: %s\n", self._spec.logfilename)
         else:
             # macOS: a series of quick os.unlink invocation might cause OS
             # error during the creation of temporary file. By using
             # NamedTemporaryFile, we defer the removal of file and directory.
             self._logfile = tempfile.NamedTemporaryFile()
+            print("\nLog file: %s\n", self._logfile.name)
         env = dict(os.environ)
         env.update(self._spec.environ)
         env.update(self._add_env)
@@ -294,6 +296,7 @@ class Job(object):
             cmdline = ['time', '-p'] + cmdline
         else:
             measure_cpu_costs = False
+        print("\nCommand: %s\n", cmdline)
         try_start = lambda: subprocess.Popen(args=cmdline,
                                              stderr=subprocess.STDOUT,
                                              stdout=self._logfile,
